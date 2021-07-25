@@ -550,6 +550,8 @@ class RoIHeads(torch.nn.Module):
         self.keypoint_head = keypoint_head
         self.keypoint_predictor = keypoint_predictor
 
+        self.kana_prediction_module = None
+
     def has_mask(self):
         if self.mask_roi_pool is None:
             return False
@@ -866,5 +868,9 @@ class RoIHeads(torch.nn.Module):
                     r["keypoints_scores"] = kps
 
             losses.update(loss_keypoint)
+
+        if self.kana_prediction_module != None:
+            result, loss_kana = self.kana_prediction_module(features, proposals, image_shapes, matched_idxs, labels, result, targets)
+            losses.update(loss_kana)
 
         return result, losses
