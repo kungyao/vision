@@ -190,6 +190,14 @@ class RPNHead(nn.Module):
         self.conv = nn.Conv2d(
             in_channels, in_channels, kernel_size=3, stride=1, padding=1
         )
+        # 下列為預設anchor
+        # anchor_sizes = ((32,), (64,), (128,), (256,), (512,))
+        # aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        # 設apsect ratio size為N = 3 
+        #
+        # cls_logits 輸出為 B * N * W * H
+        # 產出 N 張不同的feature，分別對應每個aspect。
+        # 
         self.cls_logits = nn.Conv2d(in_channels, num_anchors, kernel_size=1, stride=1)
         self.bbox_pred = nn.Conv2d(
             in_channels, num_anchors * 4, kernel_size=1, stride=1
@@ -203,6 +211,7 @@ class RPNHead(nn.Module):
         # type: (List[Tensor])
         logits = []
         bbox_reg = []
+        # 只創一組conv module，所有feature共用
         for feature in x:
             t = F.relu(self.conv(feature))
             logits.append(self.cls_logits(t))
