@@ -216,6 +216,10 @@ class FasterRCNN(GeneralizedRCNN):
                 representation_size,
                 num_classes)
 
+        #
+        # box_detections_per_img: 決定每張圖片box的最大輸出數量。
+        # 
+
         roi_heads = RoIHeads(
             # Box
             box_roi_pool, box_head, box_predictor,

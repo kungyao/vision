@@ -119,10 +119,14 @@ class MultiScaleRoIAlign(nn.Module):
 
     def convert_to_roi_format(self, boxes):
         # type: (List[Tensor])
+        # 攤平boxes，變成 (total-box-size, 4)。
         concat_boxes = torch.cat(boxes, dim=0)
         device, dtype = concat_boxes.device, concat_boxes.dtype
+        # 生成box id，根據每張圖片持有的box數量，生成對應長度的array，
+        # 再攤平，變成 (total-box-size, 1)。
         ids = torch.cat(
             [
+                # (len(b), 1)
                 torch.full_like(b[:, :1], i, dtype=dtype, layout=torch.strided, device=device)
                 for i, b in enumerate(boxes)
             ],
