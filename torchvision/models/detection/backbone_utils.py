@@ -41,14 +41,20 @@ class BackboneWithFPN(nn.Module):
         return x
 
 
-def resnet_fpn_backbone(backbone_name, pretrained):
+def resnet_fpn_backbone(backbone_name, pretrained, trainable_layers=3):
     backbone = resnet.__dict__[backbone_name](
         pretrained=pretrained,
         norm_layer=misc_nn_ops.FrozenBatchNorm2d)
     # freeze layers
+    # Let another layer trainable. Copy from latest torchvision version.
+    assert trainable_layers <= 5 and trainable_layers >= 0
+    layers_to_train = ['layer4', 'layer3', 'layer2', 'layer1', 'conv1'][:trainable_layers]
     for name, parameter in backbone.named_parameters():
-        if 'layer2' not in name and 'layer3' not in name and 'layer4' not in name:
+        if all([not name.startswith(layer) for layer in layers_to_train]):
             parameter.requires_grad_(False)
+    # for name, parameter in backbone.named_parameters():
+    #     if 'layer2' not in name and 'layer3' not in name and 'layer4' not in name:
+    #         parameter.requires_grad_(False)
 
     return_layers = {'layer1': '0', 'layer2': '1', 'layer3': '2', 'layer4': '3'}
 

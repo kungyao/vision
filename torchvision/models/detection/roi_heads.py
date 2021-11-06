@@ -551,6 +551,7 @@ class RoIHeads(torch.nn.Module):
         self.keypoint_predictor = keypoint_predictor
 
         self.kana_prediction_module = None
+        self.bubble_mask_prediction_module = None
 
     def has_mask(self):
         if self.mask_roi_pool is None:
@@ -869,8 +870,12 @@ class RoIHeads(torch.nn.Module):
 
             losses.update(loss_keypoint)
 
-        if self.kana_prediction_module != None:
+        if self.kana_prediction_module is not None:
             result, loss_kana = self.kana_prediction_module(features, proposals, image_shapes, matched_idxs, labels, result, targets)
             losses.update(loss_kana)
+
+        if self.bubble_mask_prediction_module is not None:
+            result, loss_bubble_mask = self.bubble_mask_prediction_module(features, proposals, image_shapes, matched_idxs, labels, result, targets)
+            losses.update(loss_bubble_mask)
 
         return result, losses
